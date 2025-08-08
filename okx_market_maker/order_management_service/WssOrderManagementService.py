@@ -3,7 +3,7 @@ import time
 from typing import List, Dict
 
 from okx_market_maker.order_management_service.model.Order import Order, Orders
-from okx.websocket.WsPrivate import WsPrivate
+from okx.websocket.WsPrivateAsync import WsPrivateAsync as WsPrivate
 from okx_market_maker import orders_container
 from okx_market_maker.settings import API_KEY, API_KEY_SECRET, API_PASSPHRASE
 

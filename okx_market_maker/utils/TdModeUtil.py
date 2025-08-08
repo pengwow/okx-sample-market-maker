@@ -7,29 +7,29 @@ class TdModeUtil:
     def decide_trading_mode(cls, account_config: AccountConfigMode, inst_type: InstType,
                             td_mode_setting: str = TRADING_MODE) -> TdMode:
         """
-        Trade Mode, when placing an order, you need to specify the trade mode.
-        Non-margined:
-        - SPOT and OPTION buyer: cash
-        Single-currency margin account:
-        - Isolated MARGIN: isolated
-        - Cross MARGIN: cross
-        - Cross SPOT: cash
-        - Cross FUTURES/SWAP/OPTION: cross
-        - Isolated FUTURES/SWAP/OPTION: isolated
-        Multi-currency margin account:
-        - Isolated MARGIN: isolated
-        - Cross SPOT: cross
-        - Cross FUTURES/SWAP/OPTION: cross
-        - Isolated FUTURES/SWAP/OPTION: isolated
-        Portfolio margin:
-        - Isolated MARGIN: isolated
-        - Cross SPOT: cross
-        - Cross FUTURES/SWAP/OPTION: cross
-        - Isolated FUTURES/SWAP/OPTION: isolated
-        :param account_config:
-        :param inst_type:
-        :param td_mode_setting:
-        :return:
+        交易模式，下单时需要指定交易模式。
+        非保证金模式：
+        - 现货和期权买方：cash（现货）
+        单币种保证金账户：
+        - 逐仓保证金：isolated
+        - 全仓保证金：cross
+        - 全仓现货：cash
+        - 全仓期货/永续/期权：cross
+        - 逐仓期货/永续/期权：isolated
+        多币种保证金账户：
+        - 逐仓保证金：isolated
+        - 全仓现货：cross
+        - 全仓期货/永续/期权：cross
+        - 逐仓期货/永续/期权：isolated
+        组合保证金：
+        - 逐仓保证金：isolated
+        - 全仓现货：cross
+        - 全仓期货/永续/期权：cross
+        - 逐仓期货/永续/期权：isolated
+        :param account_config: 账户配置模式
+        :param inst_type: 产品类型
+        :param td_mode_setting: 交易模式设置
+        :return: 交易模式枚举值
         """
         if account_config == AccountConfigMode.CASH:
             if inst_type not in [InstType.SPOT, InstType.OPTION]:

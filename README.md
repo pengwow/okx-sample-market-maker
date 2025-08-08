@@ -1,14 +1,14 @@
-# OKX Sample Market Maker
+# OKX示例做市商
 
-## Overview
-This is an unofficial sample Python market marker using [OKX V5 API](https://www.okx.com/docs-v5/en/#overview), based on the [OKX V5 API PYTHON SDK](https://github.com/okxapi/python-okx).
+## 概述
+这是一个非官方的Python做市商示例，使用[OKX V5 API](https://www.okx.com/docs-v5/en/#overview)，基于[OKX V5 API PYTHON SDK](https://github.com/okxapi/python-okx)开发。
 
-The goal of this project is to provide one of the solution for users to build a proper trading system that can subscribe market data updates, order updates and account and position updates in a precise and timely manner, send order operation requests based on strategy ideas and through the order management process, and write arbitrary customized strategy logic on the top of the trading system. The aim of this project is purely for exhibition or research purpose. Users are strongly recommended to use [DEMO TRADING ENVIRONMENT](https://www.okx.com/docs-v5/en/#overview-demo-trading-services) for any development. This project should not guarantee any PNL seeking strategy or liquidity providing obligation. 
+本项目旨在为用户提供一种解决方案，帮助构建一个能够精确及时地订阅市场数据更新、订单更新以及账户和持仓更新的交易系统，基于策略思想通过订单管理流程发送订单操作请求，并在交易系统之上编写任意自定义策略逻辑。本项目纯粹用于展示或研究目的。强烈建议用户在任何开发过程中使用[模拟交易环境](https://www.okx.com/docs-v5/en/#overview-demo-trading-services)。本项目不保证任何追求盈利的策略或提供流动性的义务。
 
-This project is not related to the OKX Trading Bots features. To get access to multiple strategies that can help you trade at ease, please refer to [OKX Trading Bots](https://www.okx.com/trading-bot).
+本项目与OKX交易机器人功能无关。如需使用多种策略轻松进行交易，请参考[OKX交易机器人](https://www.okx.com/trading-bot)。
 
-## Getting Started
-### Prerequisites
+## 入门指南
+### 先决条件
 ```python version：>=3.9```
 ```WebSocketAPI： websockets package advise version 6.0```
 ```python-okx>=0.1.9```
@@ -17,17 +17,17 @@ This project is not related to the OKX Trading Bots features. To get access to m
 ```Twisted~=22.10.0```
 ```PyYAML~=6.0```
 
-### Quick Start
-1. Git clone this project to your local development environment. Click the Code button on the top-right of the page, and follow the instruction to git clone the project.
-2. Open the project folder okx-sample-market-maker. Install the dependency by command ```pip install -r requirements.txt```. Creating a python virtual environment using ```virtualenv``` is strongly recommended.
-3. Switch to demo trading mode in your OKX account. Generate a DEMO Trading API key under demo trading mode. For the introduction to OKX demo trading environment, please refer to [How to Practice Trading Crypto on OKX](https://www.okx.com/learn/how-to-practice-trading-crypto-on-okx-with-demo-trading).
-4. Put your API key credentials into ```okx_market_market/settings.py```, in the section of  ```API_KEY```, ```API_SECRET_KEY```, and ```API_SECRET_KEY```. It is recommended to set ```IS_PAPER_TRADING```  as True.
-5. The ```TRADING_INSTRUMENT_ID``` in ```okx_market_market/settings.py``` by default is set as *BTC-USDT-SWAP* with ```TRADING_MODE``` as *cross*. If you want to trade on other symbol, feel free the change this field. To fetch the valid Instrument ID, please refer to [OKX Public API](https://www.okx.com/docs-v5/en/#rest-api-public-data-get-instruments). Some valid InstId examples from OKX: ```BTC-USDT / BTC-USDT-SWAP / BTC-USDT-230630 / BTC-USD-230623-22000-C```. For the selection of Trading Mode (cash/isolated/cross), please refer to *Trading Instrument & Trading Mode* section below.
-6. ```okx_market_market/params.yaml``` stores a set of strategy parameters that could be dynamic loaded during the strategy run-time. Make sure you review these parameters before hit the running button. Some parameters like ```single_size_as_multiple_of_lot_size``` is instrument-related so will need users own judgement.
-7. HIT THE RUN BUTTON! Run the sample market maker by running the main script ```okx_market_maker/run_sample_market_maker.py``` from your IDE or from command line. From the command line you can simply run ```python3 -m okx_market_maker.run_sample_market_maker```.
+### 快速开始
+1. 将本项目克隆到本地开发环境。点击页面右上角的Code按钮，按照说明进行git克隆。
+2. 打开项目文件夹okx-sample-market-maker。通过命令```pip install -r requirements.txt```安装依赖。强烈建议使用```virtualenv```创建Python虚拟环境。
+3. 在OKX账户中切换到模拟交易模式。在模拟交易模式下生成模拟交易API密钥。有关OKX模拟交易环境的介绍，请参考[如何在OKX上练习加密货币交易](https://www.okx.com/learn/how-to-practice-trading-crypto-on-okx-with-demo-trading)。
+4. 将API密钥凭证放入```okx_market_market/settings.py```中的```API_KEY```、```API_SECRET_KEY```和```API_SECRET_KEY```部分。建议将```IS_PAPER_TRADING```设置为True。
+5. ```okx_market_market/settings.py```中的```TRADING_INSTRUMENT_ID```默认设置为*BTC-USDT-SWAP*，```TRADING_MODE```为*cross*。如果想交易其他标的，可以随意更改此字段。要获取有效的交易标的ID，请参考[OKX公共API](https://www.okx.com/docs-v5/en/#rest-api-public-data-get-instruments)。OKX的一些有效InstId示例：```BTC-USDT / BTC-USDT-SWAP / BTC-USDT-230630 / BTC-USD-230623-22000-C```。关于交易模式（cash/isolated/cross）的选择，请参考下面的“交易标的与交易模式”部分。
+6. ```okx_market_market/params.yaml```存储了一组可在策略运行时动态加载的策略参数。在点击运行按钮之前，请务必检查这些参数。有些参数如```single_size_as_multiple_of_lot_size```与交易标的相关，需要用户自行判断。
+7. 点击运行按钮！从IDE或命令行运行主脚本```okx_market_maker/run_sample_market_maker.py```来启动示例做市商。在命令行中，只需运行```python3 -m okx_market_maker.run_sample_market_maker```。
 
 
-### Trading Instrument & Trading Mode
+### 交易标的与交易模式
 ```Trade Mode, when placing an order, you need to specify the trade mode.
 Non-margined:
 - SPOT and OPTION buyer: cash
@@ -49,7 +49,7 @@ Portfolio margin:
 - Isolated FUTURES/SWAP/OPTION: isolated
 ```
 
-### Output
+### 输出
 ```PLACE ORDER limit buy BTC-USDT-SWAP 2.0 @ 26441.4
 PLACE ORDER limit buy BTC-USDT-SWAP 2.0 @ 26414.9
 PLACE ORDER limit buy BTC-USDT-SWAP 2.0 @ 26388.4

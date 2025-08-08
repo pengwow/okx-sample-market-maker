@@ -3,7 +3,7 @@ from typing import Dict, List
 import time
 from okx_market_maker import order_books
 from okx_market_maker.market_data_service.model.OrderBook import OrderBook, OrderBookLevel
-from okx.websocket.WsPublic import WsPublic
+from okx.websocket.WsPublicAsync import WsPublicAsync as WsPublic
 
 
 class WssMarketDataService(WsPublic):
@@ -49,7 +49,8 @@ def _callback(message):
 
 def on_orderbook_snapshot_or_update(message):
     """
-    :param message:
+    处理订单簿快照或更新消息
+    :param message: 消息格式如下
     {
     "arg": {
         "channel": "books",

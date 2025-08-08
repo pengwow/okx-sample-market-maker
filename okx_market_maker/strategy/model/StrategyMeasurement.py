@@ -29,27 +29,20 @@ class StrategyMeasurement:
 
     def calc_pnl(self):
         """
-        This P&L calculation is based on RiskSnapshots at current moment and inception, comparing both cash
-        and instrument positions. e.g.
+        此盈亏计算基于当前和初始时刻的风险快照，比较现金和工具头寸。例如：
 
-        Example 1:
-        Inception: {'BTC': 1, 'USDT': 30000} in cash, with no derivatives position.
-        Current: {'BTC': 1.5, 'USDT': 15000} in cash, with no derivatives position. This can be seen as another 0.5 BTC
-                 spot bought at 30000. Current BTC-USDT is 36000.
-        Because of the additional 0.5 BTC bought at 30000, this trade will generate 0.5 * (36000 - 30000) = 3000 USDT,
-        so 3000 USDT will be the current P&L.
+        示例1：
+        初始：现金中有{'BTC': 1, 'USDT': 30000}，无衍生品头寸。
+        当前：现金中有{'BTC': 1.5, 'USDT': 15000}，无衍生品头寸。这可以看作是以30000价格额外买入0.5 BTC现货。当前BTC-USDT价格为36000。
+        由于以30000价格额外买入0.5 BTC，这笔交易将产生0.5 * (36000 - 30000) = 3000 USDT，因此当前盈亏为3000 USDT。
 
-        Example 2:
-        Inception: {'BTC': 1, 'USDT': 30000} in cash, with long 1 BTC in BTC-USDT-SWAP @ avg_px 30000, mark_px 31000,
-                and u_pnl is 1000 USDT.
-        Current: {'BTC': 1, 'USDT': 30000} in cash, with long 2 BTC in BTC-USDT-SWAP @ avg_px 28000, mark_px 29000,
-                and u_pnl is 2000 USDT. This can be seen as another 1 BTC contract bought at 26000.
-        Assumed the inception position hold to present, it's u_pnl will become 1 * (29000 - 30000) = -1000,
-        then the P&L since inception will be (2000 - -1000) = 3000. This is also contributed from the 1BTC bought
-        at 26000 (1 * (29000 - 26000)).
+        示例2：
+        初始：现金中有{'BTC': 1, 'USDT': 30000}，同时持有1 BTC的BTC-USDT-SWAP多单，平均价格30000，标记价格31000，未实现盈亏1000 USDT。
+        当前：现金中有{'BTC': 1, 'USDT': 30000}，同时持有2 BTC的BTC-USDT-SWAP多单，平均价格28000，标记价格29000，未实现盈亏2000 USDT。这可以看作是以26000价格额外买入1 BTC合约。
+        假设初始头寸持有至当前，其未实现盈亏将变为1 * (29000 - 30000) = -1000，因此自初始以来的盈亏为(2000 - (-1000)) = 3000。这也来自于以26000买入的1 BTC产生的收益(1 * (29000 - 26000))。
 
-        This will not consider the case if the contract is expired.
-        :return: P&L in USDT.
+        本计算不考虑合约到期的情况。
+        :return: 以USDT计价的盈亏
         """
         pnl = 0
         delta_map = {}

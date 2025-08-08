@@ -6,7 +6,7 @@ from okx_market_maker.position_management_service.model.BalanceAndPosition impor
     BalanceData, PosData
 from okx_market_maker.position_management_service.model.Account import Account, AccountDetail
 from okx_market_maker.position_management_service.model.Positions import Position, Positions
-from okx.websocket.WsPrivate import WsPrivate
+from okx.websocket.WsPrivateAsync import WsPrivateAsync as WsPrivate
 from okx_market_maker import balance_and_position_container, account_container, positions_container
 from okx_market_maker.settings import API_KEY, API_KEY_SECRET, API_PASSPHRASE
 

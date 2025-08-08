@@ -74,7 +74,8 @@ class Account:
     @classmethod
     def init_from_json(cls, json_response):
         """
-        :param json_response:
+        从JSON响应初始化Account对象
+        :param json_response: JSON响应格式如下
          {
           "arg": {
             "channel": "account",
@@ -121,7 +122,7 @@ class Account:
             }
           ]
         }
-        :return:
+        :return: Account对象
         """
         data = json_response["data"][0]
         account = Account()
@@ -140,10 +141,10 @@ class Account:
 
     def update_from_json(self, json_response):
         """
-        Data pushed in regular interval: Only currencies with non-zero balance will be pushed.
-        Definition of non-zero balance: any value of eq, availEq, availBql parameters is not 0.
-        When the value of eq, availEq and availBql parameters are all zero, drop the detail of that ccy from Account
-        :param json_response: same as init_from_json
+        定期推送的数据：仅推送余额非零的币种。
+        非零余额定义：eq、availEq、availBal参数中任意值不为0。
+        当eq、availEq和availBal参数值均为零时，从Account中删除该币种的详情
+        :param json_response: 与init_from_json格式相同
         :return:
         """
         data = json_response["data"][0]
