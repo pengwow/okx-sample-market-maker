@@ -6,6 +6,18 @@ from okx_market_maker.market_data_service.model.OrderBook import OrderBook, Orde
 from okx.websocket.WsPublicAsync import WsPublicAsync as WsPublic
 
 
+def _callback(message):
+    arg = message.get("arg")
+    # print(message)
+    if not arg or not arg.get("channel"):
+        return
+    if message.get("event") == "subscribe":
+        return
+    if arg.get("channel") in ["books5", "books", "bbo-tbt", "books50-l2-tbt", "books-l2-tbt"]:
+        on_orderbook_snapshot_or_update(message)
+        # print(order_books)
+
+
 class WssMarketDataService(WsPublic):
     def __init__(self, url, inst_id, channel="books5"):
         super().__init__(url)
@@ -14,11 +26,11 @@ class WssMarketDataService(WsPublic):
         order_books[self.inst_id] = OrderBook(inst_id=inst_id)
         self.args = []
 
-    def run_service(self):
+    async def run_service(self):
         args = self._prepare_args()
         print(args)
         print("subscribing")
-        self.subscribe(args, _callback)
+        await self.subscribe(args, _callback)
         self.args += args
 
     def stop_service(self):
@@ -33,18 +45,6 @@ class WssMarketDataService(WsPublic):
         }
         args.append(books5_sub)
         return args
-
-
-def _callback(message):
-    arg = message.get("arg")
-    # print(message)
-    if not arg or not arg.get("channel"):
-        return
-    if message.get("event") == "subscribe":
-        return
-    if arg.get("channel") in ["books5", "books", "bbo-tbt", "books50-l2-tbt", "books-l2-tbt"]:
-        on_orderbook_snapshot_or_update(message)
-        # print(order_books)
 
 
 def on_orderbook_snapshot_or_update(message):
@@ -162,10 +162,10 @@ class ChecksumThread(threading.Thread):
 if __name__ == "__main__":
     # url = "wss://ws.okx.com:8443/ws/v5/public"
     url = "wss://ws.okx.com:8443/ws/v5/public?brokerId=9999"
-    market_data_service = WssMarketDataService(url=url, inst_id="BTC-USDT-SWAP", channel="books")
+    market_data_service = WssMarketDataService(
+        url=url, inst_id="BTC-USDT-SWAP", channel="books")
     market_data_service.start()
     market_data_service.run_service()
     check_sum = ChecksumThread(market_data_service)
     check_sum.start()
     time.sleep(30)
-

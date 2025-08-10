@@ -1,3 +1,4 @@
+import asyncio
 import time
 import traceback
 from abc import ABC, abstractmethod
@@ -97,7 +98,6 @@ class BaseStrategy(ABC):
         self.pms = WssPositionManagementService(
             url="wss://ws.okx.com:8443/ws/v5/private?brokerId=9999" if is_paper_trading
             else "wss://ws.okx.com:8443/ws/v5/private")
-        
         # 初始化策略订单字典，用于缓存和跟踪所有策略生成的订单
         self._strategy_order_dict = dict()
         # 初始化参数加载器，用于加载策略参数配置
@@ -538,7 +538,7 @@ class BaseStrategy(ABC):
             return False
         # 检查订单簿延迟（毫秒转秒）
         order_book_delay = time.time() - order_book.timestamp / 1000
-        if order_book_delay > ORDER_BOOK_DELAYED_SEC:
+        if order_book.timestamp and order_book_delay > ORDER_BOOK_DELAYED_SEC:
             logging.warning(f"{TRADING_INSTRUMENT_ID} delayed in order books cache for {order_book_delay:.2f} seconds!")
             return False
         # 验证订单簿数据完整性
@@ -715,9 +715,16 @@ class BaseStrategy(ABC):
         if account_config.get("code") == '0':
             self._account_mode = AccountConfigMode(int(account_config.get("data")[0]['acctLv']))
 
-    def _run_exchange_connection(self):
+    async def _run_exchange_connection(self):
         """
-        启动并运行所有交易所连接服务（市场数据、订单、仓位）
+        异步启动并运行所有交易所连接服务（市场数据、订单、仓位）
+        
+        参数：
+            无
+        返回值：
+            无
+        异常：
+            如果任何服务启动失败，将抛出相应的异常
         
         做市策略依赖多个实时数据流：
         1. 市场数据服务（MDS）：提供订单簿和成交数据
@@ -731,13 +738,15 @@ class BaseStrategy(ABC):
         
         注意：此方法会阻塞当前线程，通常在单独线程中运行
         """
-        self.mds.start()
-        self.oms.start()
-        self.pms.start()
+        # 异步启动各服务并等待完成
+        await self.mds.start()
+        await self.oms.start()
+        await self.pms.start()
         self.rest_mds.start()
-        self.mds.run_service()
-        self.oms.run_service()
-        self.pms.run_service()
+        # 异步运行各服务
+        await self.mds.run_service()
+        await self.oms.run_service()
+        await self.pms.run_service()
 
     def trading_instrument_type(self) -> InstType:
         """
@@ -816,7 +825,7 @@ class BaseStrategy(ABC):
         InstrumentUtil.get_instrument(TRADING_INSTRUMENT_ID, self.trading_instrument_type)
         self.set_strategy_measurement(trading_instrument=TRADING_INSTRUMENT_ID,
                                       trading_instrument_type=self.trading_instrument_type)
-        self._run_exchange_connection()
+        asyncio.run(self._run_exchange_connection())
         while 1:
             try:
                 # 检查交易所状态，避免在维护期间交易

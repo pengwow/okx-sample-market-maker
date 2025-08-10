@@ -7,6 +7,16 @@ from okx.websocket.WsPrivateAsync import WsPrivateAsync as WsPrivate
 from okx_market_maker import orders_container
 from okx_market_maker.settings import API_KEY, API_KEY_SECRET, API_PASSPHRASE
 
+def _callback(message):
+    arg = message.get("arg")
+    # print(message)
+    if not arg or not arg.get("channel"):
+        return
+    if message.get("event") == "subscribe":
+        return
+    if arg.get("channel") == "orders":
+        on_orders_update(message)
+        # print(orders_container)
 
 class WssOrderManagementService(WsPrivate):
     def __init__(self, url: str, api_key: str = API_KEY, passphrase: str = API_PASSPHRASE,
@@ -14,12 +24,12 @@ class WssOrderManagementService(WsPrivate):
         super().__init__(api_key, passphrase, secret_key, url, useServerTime)
         self.args = []
 
-    def run_service(self):
+    async def run_service(self):
         args = self._prepare_args()
         print(args)
         print("subscribing")
         orders_container.append(Orders())
-        self.subscribe(args, _callback)
+        await self.subscribe(args, _callback)
         self.args += args
 
     def stop_service(self):
@@ -36,17 +46,6 @@ class WssOrderManagementService(WsPrivate):
         args.append(orders_sub)
         return args
 
-
-def _callback(message):
-    arg = message.get("arg")
-    # print(message)
-    if not arg or not arg.get("channel"):
-        return
-    if message.get("event") == "subscribe":
-        return
-    if arg.get("channel") == "orders":
-        on_orders_update(message)
-        # print(orders_container)
 
 
 def on_orders_update(message):

@@ -12,11 +12,11 @@ OKX做市商项目入口文件
 """
 import asyncio
 import logging
-from market_data_service.WssMarketDataService import WssMarketDataService
-from order_management_service.WssOrderManagementService import WssOrderManagementService
-from position_management_service.WssPositionManagementService import WssPositionManagementService
-from strategy.SampleMM import SampleMM
-from settings import API_KEY, API_SECRET, API_PASSPHRASE, IS_PAPER_TRADING
+from okx_market_maker.market_data_service.WssMarketDataService import WssMarketDataService
+from okx_market_maker.order_management_service.WssOrderManagementService import WssOrderManagementService
+from okx_market_maker.position_management_service.WssPositionManagementService import WssPositionManagementService
+from okx_market_maker.strategy.SampleMM import SampleMM
+from okx_market_maker.settings import API_KEY, API_KEY_SECRET, API_PASSPHRASE, IS_PAPER_TRADING
 
 
 async def main():

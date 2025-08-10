@@ -11,42 +11,6 @@ from okx_market_maker import balance_and_position_container, account_container, 
 from okx_market_maker.settings import API_KEY, API_KEY_SECRET, API_PASSPHRASE
 
 
-class WssPositionManagementService(WsPrivate):
-    def __init__(self, url: str, api_key: str = API_KEY, passphrase: str = API_PASSPHRASE,
-                 secret_key: str = API_KEY_SECRET, useServerTime: bool = False):
-        super().__init__(api_key, passphrase, secret_key, url, useServerTime)
-        self.args = []
-
-    def run_service(self):
-        args = self._prepare_args()
-        print(args)
-        print("subscribing")
-        self.subscribe(args, _callback)
-        self.args += args
-
-    def stop_service(self):
-        self.unsubscribe(self.args, lambda message: print(message))
-        self.close()
-
-    @staticmethod
-    def _prepare_args() -> List[Dict]:
-        args = []
-        account_sub = {
-                "channel": "account"
-        }
-        args.append(account_sub)
-        positions_sub = {
-            "channel": "positions",
-            "instType": "ANY"
-        }
-        args.append(positions_sub)
-        balance_and_position_sub = {
-            "channel": "balance_and_position"
-        }
-        args.append(balance_and_position_sub)
-        return args
-
-
 def _callback(message):
     arg = message.get("arg")
     # print(message)
@@ -65,6 +29,44 @@ def _callback(message):
         # print(message)
         on_position(message)
         # print(positions_container)
+
+
+class WssPositionManagementService(WsPrivate):
+    def __init__(self, url: str, api_key: str = API_KEY, passphrase: str = API_PASSPHRASE,
+                 secret_key: str = API_KEY_SECRET, useServerTime: bool = False):
+        super().__init__(api_key, passphrase, secret_key, url, useServerTime)
+        self.args = []
+
+    async def run_service(self):
+        args = self._prepare_args()
+        print(args)
+        print("subscribing")
+        await self.subscribe(args, _callback)
+        self.args += args
+
+    def stop_service(self):
+        self.unsubscribe(self.args, lambda message: print(message))
+        self.close()
+
+    @staticmethod
+    def _prepare_args() -> List[Dict]:
+        args = []
+        account_sub = {
+            "channel": "account"
+        }
+        args.append(account_sub)
+        positions_sub = {
+            "channel": "positions",
+            "instType": "ANY"
+        }
+        args.append(positions_sub)
+        balance_and_position_sub = {
+            "channel": "balance_and_position"
+        }
+        args.append(balance_and_position_sub)
+        return args
+
+
 
 
 def on_balance_and_position(message):

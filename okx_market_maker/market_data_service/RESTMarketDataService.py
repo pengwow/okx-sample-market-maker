@@ -44,6 +44,9 @@ class RESTMarketDataService(threading.Thread):
             except (OkxAPIException, OkxParamsException, OkxRequestException):
                 logging.warning(traceback.format_exc())
                 time.sleep(10)
+            except Exception:
+                logging.error(traceback.format_exc())
+                time.sleep(10)
 
 
 if __name__ == "__main__":
