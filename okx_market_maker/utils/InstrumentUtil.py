@@ -5,7 +5,7 @@ from okx.PublicData import PublicAPI
 
 from okx_market_maker import instruments
 from okx_market_maker.position_management_service.model.Positions import Position
-from okx_market_maker.settings import IS_PAPER_TRADING
+from okx_market_maker.settings import IS_PAPER_TRADING, PROXY
 from okx_market_maker.utils.OkxEnum import InstType, OrderSide, InstState
 from okx_market_maker.market_data_service.model.Instrument import Instrument
 from okx_market_maker import mark_px_container
@@ -17,7 +17,7 @@ INST_ID_SUGGESTION = "valid instId examples:\n"\
 
 
 class InstrumentUtil:
-    public_api = PublicAPI(flag='0' if not IS_PAPER_TRADING else '1')
+    public_api = PublicAPI(flag='0' if not IS_PAPER_TRADING else '1', proxy=PROXY or None)
 
     @classmethod
     def get_inst_type_from_inst_id(cls, inst_id: str) -> InstType:

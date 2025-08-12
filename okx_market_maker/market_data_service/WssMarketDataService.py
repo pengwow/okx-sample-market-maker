@@ -1,12 +1,15 @@
 import threading
 from typing import Dict, List
 import time
+import json
 from okx_market_maker import order_books
 from okx_market_maker.market_data_service.model.OrderBook import OrderBook, OrderBookLevel
 from okx.websocket.WsPublicAsync import WsPublicAsync as WsPublic
 
 
 def _callback(message):
+    if message and isinstance(message, str):
+        message = json.loads(message)
     arg = message.get("arg")
     # print(message)
     if not arg or not arg.get("channel"):

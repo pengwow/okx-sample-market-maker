@@ -57,7 +57,7 @@ class BaseStrategy(ABC):
     _account_mode: AccountConfigMode = None  # 账户配置模式（如简单账户、单币种保证金账户等）
 
     def __init__(self, api_key=API_KEY, api_key_secret=API_KEY_SECRET, api_passphrase=API_PASSPHRASE,
-                 is_paper_trading: bool = IS_PAPER_TRADING):
+                 is_paper_trading: bool = IS_PAPER_TRADING, proxy: str = PROXY):
         """
         初始化做市策略基类实例，创建与OKX交易所的连接并初始化核心服务
         
@@ -74,12 +74,12 @@ class BaseStrategy(ABC):
         """
         # 创建OKX交易API客户端，flag参数控制实盘(0)或模拟盘(1)
         self.trade_api = TradeAPI(api_key=api_key, api_secret_key=api_key_secret, passphrase=api_passphrase,
-                                  flag='0' if not is_paper_trading else '1', debug=False)
+                                  flag='0' if not is_paper_trading else '1', debug=False, proxy=proxy or None)
         # 创建OKX状态API客户端
-        self.status_api = StatusAPI(flag='0' if not is_paper_trading else '1', debug=False)
+        self.status_api = StatusAPI(flag='0' if not is_paper_trading else '1', debug=False, proxy=proxy or None)
         # 创建OKX账户API客户端
         self.account_api = AccountAPI(api_key=api_key, api_secret_key=api_key_secret, passphrase=api_passphrase,
-                                      flag='0' if not is_paper_trading else '1', debug=False)
+                                      flag='0' if not is_paper_trading else '1', debug=False, proxy=proxy or None)
         
         # 初始化Websocket市场数据服务，订阅订单簿频道
         self.mds = WssMarketDataService(
