@@ -4,7 +4,7 @@ import time
 import json
 from okx_market_maker import order_books
 from okx_market_maker.market_data_service.model.OrderBook import OrderBook, OrderBookLevel
-from okx.websocket.WsPublicAsync import WsPublicAsync as WsPublic
+from okx_market_maker.utils.CustomWsPublicAsync import CustomWsPublicAsync as WsPublic
 
 
 def _callback(message):
@@ -22,8 +22,8 @@ def _callback(message):
 
 
 class WssMarketDataService(WsPublic):
-    def __init__(self, url, inst_id, channel="books5"):
-        super().__init__(url)
+    def __init__(self, url, inst_id, channel="books5", proxy_host=None, proxy_port=None, proxy_type=None):
+        super().__init__(url, proxy_host=proxy_host, proxy_port=proxy_port, proxy_type=proxy_type)
         self.inst_id = inst_id
         self.channel = channel
         order_books[self.inst_id] = OrderBook(inst_id=inst_id)
@@ -38,7 +38,7 @@ class WssMarketDataService(WsPublic):
 
     def stop_service(self):
         self.unsubscribe(self.args, lambda message: print(message))
-        self.close()
+        self.stop_sync()
 
     def _prepare_args(self) -> List[Dict]:
         args = []

@@ -1,3 +1,4 @@
+import json
 import time
 from typing import List, Dict
 import copy
@@ -6,12 +7,13 @@ from okx_market_maker.position_management_service.model.BalanceAndPosition impor
     BalanceData, PosData
 from okx_market_maker.position_management_service.model.Account import Account, AccountDetail
 from okx_market_maker.position_management_service.model.Positions import Position, Positions
-from okx.websocket.WsPrivateAsync import WsPrivateAsync as WsPrivate
+from okx_market_maker.utils.CustomWsPrivateAsync import CustomWsPrivateAsync as WsPrivate
 from okx_market_maker import balance_and_position_container, account_container, positions_container
 from okx_market_maker.settings import API_KEY, API_KEY_SECRET, API_PASSPHRASE
 
 
 def _callback(message):
+    message = json.loads(message)
     arg = message.get("arg")
     # print(message)
     if not arg or not arg.get("channel"):
@@ -33,8 +35,9 @@ def _callback(message):
 
 class WssPositionManagementService(WsPrivate):
     def __init__(self, url: str, api_key: str = API_KEY, passphrase: str = API_PASSPHRASE,
-                 secret_key: str = API_KEY_SECRET, useServerTime: bool = False):
-        super().__init__(api_key, passphrase, secret_key, url, useServerTime)
+                 secret_key: str = API_KEY_SECRET, useServerTime: bool = False,
+                 proxy_host=None, proxy_port=None, proxy_type=None):
+        super().__init__(api_key, passphrase, secret_key, url, useServerTime, proxy_host=proxy_host, proxy_port=proxy_port, proxy_type=proxy_type)
         self.args = []
 
     async def run_service(self):

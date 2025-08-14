@@ -6,6 +6,7 @@ from decimal import Decimal
 from typing import List, Dict, Tuple
 import logging
 from copy import deepcopy
+import httpx
 
 from okx.Status import StatusAPI
 from okx_market_maker.market_data_service.model.Instrument import Instrument, InstState
@@ -81,23 +82,45 @@ class BaseStrategy(ABC):
         self.account_api = AccountAPI(api_key=api_key, api_secret_key=api_key_secret, passphrase=api_passphrase,
                                       flag='0' if not is_paper_trading else '1', debug=False, proxy=proxy or None)
         
+        # 解析代理配置
+        proxy_host, proxy_port, proxy_type = None, None, None
+        if proxy:
+            if proxy.startswith("http://"):
+                proxy_type = "http"
+                proxy = proxy[7:]
+            elif proxy.startswith("socks5://"):
+                proxy_type = "socks5"
+                proxy = proxy[9:]
+            if ":" in proxy:
+                proxy_host, proxy_port = proxy.split(":")
+                proxy_port = int(proxy_port)
+        
         # 初始化Websocket市场数据服务，订阅订单簿频道
         self.mds = WssMarketDataService(
             url="wss://wspap.okx.com:8443/ws/v5/public?brokerId=9999" if is_paper_trading
             else "wss://wspap.okx.com:8443/ws/v5/public",
             inst_id=TRADING_INSTRUMENT_ID,
-            channel="books"
+            channel="books",
+            proxy_host=proxy_host,
+            proxy_port=proxy_port,
+            proxy_type=proxy_type
         )
         # 初始化REST市场数据服务，用于获取历史数据
         self.rest_mds = RESTMarketDataService(is_paper_trading)
         # 初始化Websocket订单管理服务，用于接收订单状态更新
         self.oms = WssOrderManagementService(
             url="wss://wspap.okx.com:8443/ws/v5/private?brokerId=9999" if is_paper_trading
-            else "wss://wspap.okx.com:8443/ws/v5/private")
+            else "wss://wspap.okx.com:8443/ws/v5/private",
+            proxy_host=proxy_host,
+            proxy_port=proxy_port,
+            proxy_type=proxy_type)
         # 初始化Websocket仓位管理服务，用于接收仓位变动通知
         self.pms = WssPositionManagementService(
             url="wss://wspap.okx.com:8443/ws/v5/private?brokerId=9999" if is_paper_trading
-            else "wss://wspap.okx.com:8443/ws/v5/private")
+            else "wss://wspap.okx.com:8443/ws/v5/private",
+            proxy_host=proxy_host,
+            proxy_port=proxy_port,
+            proxy_type=proxy_type)
         # 初始化策略订单字典，用于缓存和跟踪所有策略生成的订单
         self._strategy_order_dict = dict()
         # 初始化参数加载器，用于加载策略参数配置
@@ -710,10 +733,34 @@ class BaseStrategy(ABC):
         4. 资金利用率
         
         实现逻辑：通过账户API获取账户等级，映射为对应的账户配置模式枚举值
+        
+        异常处理：
+        - 捕获httpx.ConnectError连接错误并重试最多3次
+        - 其他异常将被重新抛出
+        
+        :raises httpx.ConnectError: 当网络连接失败且重试超过限制时
+        :raises Exception: 当API返回错误码时
         """
-        account_config = self.account_api.get_account_config()
-        if account_config.get("code") == '0':
-            self._account_mode = AccountConfigMode(int(account_config.get("data")[0]['acctLv']))
+        max_retries = 3
+        retry_count = 0
+        
+        while retry_count < max_retries:
+            try:
+                account_config = self.account_api.get_account_config()
+                if account_config.get("code") == '0':
+                    self._account_mode = AccountConfigMode(int(account_config.get("data")[0]['acctLv']))
+                    return  # 成功获取配置后直接返回
+                else:
+                    raise Exception(f"Account API returned error code: {account_config.get('code')}")
+            except httpx.ConnectError as e:
+                retry_count += 1
+                print(f"连接错误 (尝试 {retry_count}/{max_retries}): {e}")
+                if retry_count >= max_retries:
+                    raise  # 重试次数用尽后重新抛出异常
+                time.sleep(1)  # 等待1秒后重试
+            except Exception as e:
+                # 对于非连接错误，直接抛出
+                raise
 
     async def _run_exchange_connection(self):
         """
