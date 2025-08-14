@@ -4,4 +4,5 @@ shortuuid~=1.0.11
 Twisted~=22.10.0
 PyYAML~=6.0
 python-socketio==5.13.0
-# httpx[socks]
+httpx-socks==0.10.1
+websockets==15.0.1

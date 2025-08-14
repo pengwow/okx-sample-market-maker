@@ -26,7 +26,7 @@ async def main():
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
     strategy = SampleMM()
-    strategy.run()
+    await strategy.run()
     # 异步启动各服务并等待完成
     # is_paper_trading = True
     # mds = WssMarketDataService(

@@ -162,13 +162,17 @@ class ChecksumThread(threading.Thread):
                 break
 
 
-if __name__ == "__main__":
+async def main():
     # url = "wss://ws.okx.com:8443/ws/v5/public"
-    url = "wss://ws.okx.com:8443/ws/v5/public?brokerId=9999"
+    url = "wss://wspap.okx.com:8443/ws/v5/public?brokerId=9999"
     market_data_service = WssMarketDataService(
         url=url, inst_id="BTC-USDT-SWAP", channel="books")
-    market_data_service.start()
-    market_data_service.run_service()
+    await market_data_service.start()
+    await market_data_service.run_service()
     check_sum = ChecksumThread(market_data_service)
     check_sum.start()
-    time.sleep(30)
+    await asyncio.sleep(30)
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())

@@ -83,8 +83,8 @@ class BaseStrategy(ABC):
         
         # 初始化Websocket市场数据服务，订阅订单簿频道
         self.mds = WssMarketDataService(
-            url="wss://ws.okx.com:8443/ws/v5/public?brokerId=9999" if is_paper_trading
-            else "wss://ws.okx.com:8443/ws/v5/public",
+            url="wss://wspap.okx.com:8443/ws/v5/public?brokerId=9999" if is_paper_trading
+            else "wss://wspap.okx.com:8443/ws/v5/public",
             inst_id=TRADING_INSTRUMENT_ID,
             channel="books"
         )
@@ -92,12 +92,12 @@ class BaseStrategy(ABC):
         self.rest_mds = RESTMarketDataService(is_paper_trading)
         # 初始化Websocket订单管理服务，用于接收订单状态更新
         self.oms = WssOrderManagementService(
-            url="wss://ws.okx.com:8443/ws/v5/private?brokerId=9999" if is_paper_trading
-            else "wss://ws.okx.com:8443/ws/v5/private")
+            url="wss://wspap.okx.com:8443/ws/v5/private?brokerId=9999" if is_paper_trading
+            else "wss://wspap.okx.com:8443/ws/v5/private")
         # 初始化Websocket仓位管理服务，用于接收仓位变动通知
         self.pms = WssPositionManagementService(
-            url="wss://ws.okx.com:8443/ws/v5/private?brokerId=9999" if is_paper_trading
-            else "wss://ws.okx.com:8443/ws/v5/private")
+            url="wss://wspap.okx.com:8443/ws/v5/private?brokerId=9999" if is_paper_trading
+            else "wss://wspap.okx.com:8443/ws/v5/private")
         # 初始化策略订单字典，用于缓存和跟踪所有策略生成的订单
         self._strategy_order_dict = dict()
         # 初始化参数加载器，用于加载策略参数配置
@@ -796,9 +796,16 @@ class BaseStrategy(ABC):
         self._strategy_measurement = StrategyMeasurement(trading_instrument=trading_instrument,
                                                          trading_instrument_type=trading_instrument_type)
 
-    def run(self):
+    async def run(self):
         """
-        做市策略主运行循环，协调所有组件执行做市流程
+        异步做市策略主运行循环，协调所有组件执行做市流程
+        
+        参数：
+            无
+        返回值：
+            无
+        异常：
+            如果运行过程中出现异常，将被捕获并处理
         
         这是策略的核心入口点，实现了完整的做市生命周期：
         1. 初始化阶段：账户配置、服务连接、参数加载
@@ -825,7 +832,7 @@ class BaseStrategy(ABC):
         InstrumentUtil.get_instrument(TRADING_INSTRUMENT_ID, self.trading_instrument_type)
         self.set_strategy_measurement(trading_instrument=TRADING_INSTRUMENT_ID,
                                       trading_instrument_type=self.trading_instrument_type)
-        asyncio.run(self._run_exchange_connection())
+        await self._run_exchange_connection()
         while 1:
             try:
                 # 检查交易所状态，避免在维护期间交易
